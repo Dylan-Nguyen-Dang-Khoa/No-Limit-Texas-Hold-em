@@ -39,20 +39,17 @@ class Deck:
         return str(self.deck)
     
     def __repr__(self):
-        return str
+        return str(self)
 
 class PokerGame:
     def __init__(self):
-        self.deck = Deck() 
-        self.deck.shuffle() 
         self.player_num_init()  
         self.blinds_init() 
-        self.players_init() 
+        self.players_list = [Player(input(f"Player {i+1}, please input your name: "), 1500) for i in range(self.player_num)]
         self.dealer = randint(0, len(self.players_list)-1) 
         self.small_blind_player = (self.dealer+1) % len(self.players_list) 
         self.big_blind_player = (self.dealer + 2) % len(self.players_list) 
-        self.community = []
-        self.pot = 0
+        self.quit = ""
         """
         self.deck is shuffled card deck
         self.player_num is number of players
@@ -63,6 +60,19 @@ class PokerGame:
         self.small_blind_player is the small blind position in self.players_list
         self.big_blind_player is the big blind position in self.players_list
         """
+        
+
+    def play(self):
+        while self.quit != "q":
+            self.pot = 0
+            self.community = []
+            self.movebutton()
+            for player in self.players_list:
+                player.hole_cards = []
+            self.deck = Deck() 
+            self.deck.shuffle() 
+            self.deal()
+            self.quit = input("Press q to quit, any other button to continue: ").lower()
 
     def movebutton(self):
         self.dealer = (self.dealer+1) % len(self.players_list) 
@@ -70,19 +80,11 @@ class PokerGame:
         self.big_blind_player = (self.dealer + 2) % len(self.players_list)
 
     def preflop(self):
-        contributions = [0 * self.player_num]
-        player_playing = 1
-        while len(set(contributions)) != 0:
-            print(f"{self.players_list[player_playing-1].name()}, please step forward")
-            confirmation = input("Please confirm your presence by clicking enter")
-            print("Here are your hole cards")
-            print()
-            print(self.players_list[player_playing-1].hole_cards())
-
-
-    def players_init(self):
-        self.players_list = [Player(input(f"Player {i+1}, please input your name: "), 1500) for i in range(self.player_num)]
-
+        ...
+    
+    def postflop(self):
+        ...
+        
     def deal(self):
         for _ in range(2):
             for player in self.players_list:
@@ -98,7 +100,7 @@ class PokerGame:
     
     def blinds_init(self):
         self.big_blind_amount = None
-        while self.big_blind_amount is None or not self.big_blind >= 2:
+        while self.big_blind_amount is None or not self.big_blind_amount >= 2:
             try:
                 self.big_blind_amount = int(input("Please input your big blind: "))
             except ValueError:
@@ -116,17 +118,6 @@ class HandEvaluator:
 
 def main():
     game = PokerGame()
-    quit = ""
-    while quit != "q":
-        game.deal()
-        game.preflop()
-        game.flop()
-        game.river()
-        game.showdown()
-        game.movebutton()
-        quit = input("Press q to quit, anything else to continue: ").lower()
-    print("99% of gamblers quit before they win big")
-
-
-
+    game.play()
+    
 main()

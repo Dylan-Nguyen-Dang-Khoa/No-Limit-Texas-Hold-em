@@ -110,15 +110,12 @@ class PokerGame:
                         del contributions[current_player_index]
                         player.fold_status == True
                     elif action == "call":
-                        amount = current_bet-contributions[current_player_index]
-                        player.money -= amount
-                        self.pot += amount
-                        contributions[current_player_index] += amount
+                        self.call(current_bet, contributions, current_player_index, player)
                     else:
-                        raise_to = int(input(f"Please input the amount you want to raise to (Min: {max(self.big_blind_amount * 2, last_raise_amount + current_bet)}, Max:{player.money-contributions[index]}):"))
-                        while raise_to > player.money-contributions[current_player_index] or raise_to < max(self.big_blind_amount * 2, last_raise_amount + current_bet):
+                        raise_to = int(input(f"Please input the amount you want to raise to (Min: {max(self.big_blind_amount * 2, last_raise_amount + current_bet)}, Max:{player.money+contributions[current_player_index]}):"))
+                        while raise_to > player.money+contributions[current_player_index] or raise_to < max(self.big_blind_amount * 2, last_raise_amount + current_bet):
                             print("Your raise amount is invalid. Please input a valid raise amount")
-                            raise_to = int(input(f"Please input the amount you want to raise to (Min: {max(self.big_blind_amount * 2, last_raise_amount + current_bet)}, Max:{player.money-contributions[index]}):"))
+                            raise_to = int(input(f"Please input the amount you want to raise to (Min: {max(self.big_blind_amount * 2, last_raise_amount + current_bet)}, Max:{player.money+contributions[current_player_index]}):"))
                         last_raise_amount, current_bet = raise_to - current_bet, raise_to
                         amount = current_bet - contributions[current_player_index]
                         player.money -= amount
@@ -128,7 +125,12 @@ class PokerGame:
                     continue
                 current_player_index = (current_player_index + 1) % self.player_num
 
-    
+    def call(self, current_bet, contributions, player_index, player_object):
+        amount = current_bet-contributions[player_index]
+        player_object.money -= amount
+        self.pot += amount
+        contributions[player_index] += amount
+
 
     def postflop(self):
         ...

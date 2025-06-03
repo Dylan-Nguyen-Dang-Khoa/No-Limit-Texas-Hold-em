@@ -14,8 +14,7 @@ class Player:
         self.name = name
         self.money = money
         self.hole_cards = []
-        self.fold_status = False
-     
+        self.fold_status = False 
 
     def __str__(self):
         return f"Name: {self.name}, Balance: {self.money}"
@@ -72,8 +71,18 @@ class PokerGame:
         self.small_blind_player is the small blind position in self.players_list
         self.big_blind_player is the big blind position in self.players_list
         self.utg_player is the position of the player after the big blind in self.players_list
-        """
+        """ 
         
+    def deal(self):
+        for _ in range(2):
+            for player in self.players_list:
+                player.hole_cards.append(self.deck.deal_card())
+
+    def movebutton(self):
+        self.button_player = (self.button_player+1) % self.player_num
+        self.small_blind_player = (self.button_player + 1) % self.player_num
+        self.big_blind_player = (self.button_player + 2) % self.player_num
+        self.utg_player = (self.button_player + 3) % self.player_num
 
     def play(self):
         while self.quit != "q":
@@ -88,12 +97,6 @@ class PokerGame:
             self.preflop()
             self.quit = input("Press q to quit, any other button to continue: ").lower().strip()
             self.movebutton()
-
-    def movebutton(self):
-        self.button_player = (self.button_player+1) % self.player_num
-        self.small_blind_player = (self.button_player + 1) % self.player_num
-        self.big_blind_player = (self.button_player + 2) % self.player_num
-        self.utg_player = (self.button_player + 3) % self.player_num
 
     def round_init(self):
         contributions = {key:0 for key in range(self.player_num)}
@@ -120,7 +123,11 @@ class PokerGame:
             ...
         return action
 
-
+    def game_update(self, amount, contributions, player_index, player_object):
+        contributions[player_index] += amount
+        self.pot += amount
+        player_object.money -= amount
+        return contributions
 
     def preflop(self):
         contributions, current_bet, last_raise_amount, current_player_index = self.round_init()
@@ -137,19 +144,8 @@ class PokerGame:
                     ...
             current_player_index = (current_player_index + 1) % self.player_num
 
-    def game_update(self, amount, contributions, player_index, player_object):
-        contributions[player_index] += amount
-        self.pot += amount
-        player_object.money -= amount
-        return contributions
-
     def postflop(self):
         ...
-        
-    def deal(self):
-        for _ in range(2):
-            for player in self.players_list:
-                player.hole_cards.append(self.deck.deal_card())
 
     def player_num_init(self):
         self.player_num = None

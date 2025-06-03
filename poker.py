@@ -94,42 +94,15 @@ class PokerGame:
         current_bet = self.big_blind_amount
         last_raise_amount = 0
         current_player_index = self.utg_player
-        while len(set(contributions.values())) != 1:
-            for player in self.players_list[self.utg_player:]+self.players_list[:self.utg_player]:
-                if contributions[current_player_index] != current_bet and not player.fold_status:
-                    _ =  input(f"{player.name}, it is now your turn. Please step forward and press enter to continue: ")
-                    print(f"Here are your cards: {player.hole_cards}")
-                    print("Here are you possible actions")
-                    print(f"Call(${current_bet-contributions[current_player_index]})   Raise    Fold")
-                    valid_actions = ["call", "raise", "fold"]
-                    action = input("Please input your desired action. (Spelling is important, but case-insensitive): ").lower().strip()
-                    while action not in valid_actions:
-                        print("Please input a valid action")
-                        action = input("Please input your desired action (Call, Raise or Fold). (Spelling is important, but case-insensitive): ").lower().strip()
-                    if action == "fold":
-                        del contributions[current_player_index]
-                        player.fold_status == True
-                    elif action == "call":
-                        self.call(current_bet, contributions, current_player_index, player)
-                    else:
-                        raise_to = int(input(f"Please input the amount you want to raise to (Min: {max(self.big_blind_amount * 2, last_raise_amount + current_bet)}, Max:{player.money+contributions[current_player_index]}):"))
-                        while raise_to > player.money+contributions[current_player_index] or raise_to < max(self.big_blind_amount * 2, last_raise_amount + current_bet):
-                            print("Your raise amount is invalid. Please input a valid raise amount")
-                            raise_to = int(input(f"Please input the amount you want to raise to (Min: {max(self.big_blind_amount * 2, last_raise_amount + current_bet)}, Max:{player.money+contributions[current_player_index]}):"))
-                        last_raise_amount, current_bet = raise_to - current_bet, raise_to
-                        amount = current_bet - contributions[current_player_index]
-                        player.money -= amount
-                        self.pot += amount
-                        contributions[current_player_index] += amount
-                else:
-                    continue
-                current_player_index = (current_player_index + 1) % self.player_num
+        ...
 
-    def call(self, current_bet, contributions, player_index, player_object):
-        amount = current_bet-contributions[player_index]
-        player_object.money -= amount
-        self.pot += amount
+    def game_update(self, amount, contributions, player_index, player_object):
         contributions[player_index] += amount
+        self.pot += amount
+        player_object.money -= amount
+        return contributions, player_object
+
+        
 
 
     def postflop(self):

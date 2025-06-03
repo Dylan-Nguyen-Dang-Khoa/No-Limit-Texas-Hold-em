@@ -1,4 +1,13 @@
 from random import shuffle, randint
+import os
+
+def clear_screen():
+    if os.name == "nt":
+        for i in range(2):
+            os.system("cls")
+    else:
+        for i in range(2):
+            os.system("clear")
 
 class Player:
     def __init__(self, name, money):
@@ -47,7 +56,7 @@ class PokerGame:
     def __init__(self):
         self.player_num_init()  
         self.blinds_init() 
-        self.players_list = [Player(input(f"Player {i+1}, please input your name: "), 1500) for i in range(self.player_num)]
+        self.players_list = [Player(input(f"Player {i+1}, please input your name: ").strip(), 1500) for i in range(self.player_num)]
         self.button_player = randint(0, len(self.players_list)-1) 
         self.small_blind_player = (self.button_player + 1) % self.player_num
         self.big_blind_player = (self.button_player + 2) % self.player_num
@@ -77,7 +86,7 @@ class PokerGame:
             self.deck.shuffle() 
             self.deal()
             self.preflop()
-            self.quit = input("Press q to quit, any other button to continue: ").lower()
+            self.quit = input("Press q to quit, any other button to continue: ").lower().strip()
             self.movebutton()
 
     def movebutton(self):
@@ -86,7 +95,7 @@ class PokerGame:
         self.big_blind_player = (self.button_player + 2) % self.player_num
         self.utg_player = (self.button_player + 3) % self.player_num
 
-    def preflop(self):
+    def round_init(self):
         contributions = {key:0 for key in range(self.player_num)}
         self.pot = self.big_blind_amount + self.small_blind_amount
         contributions[self.small_blind_player] += self.small_blind_amount
@@ -94,16 +103,45 @@ class PokerGame:
         current_bet = self.big_blind_amount
         last_raise_amount = 0
         current_player_index = self.utg_player
-        ...
+        return contributions, current_bet, last_raise_amount, current_player_index
+    
+    def playerUI(self, player_object, current_player_index, current_bet, contributions, type):
+        clear_screen()
+        input(f"{player_object[current_player_index].name}, it is now your turn. Please step forward and press enter to continue: ")
+        print(f"Hole cards: {player_object[current_player_index].hole_cards}", end="\n\n")
+        if type == "preflop":
+            print(f"Actions: Call({current_bet-contributions[current_player_index]})  Raise  Fold")
+            action = input("Please input your desired action (call, raise, fold). Keep in mind the spelling, but it is case-insensitive: ").lower().strip()
+            valid_moves = ["call", "fold", "raise"]
+            while action not in valid_moves:
+                print("Please input a valid move")
+                action = input("Please input your desired action (call, raise, fold). Keep in mind the spelling, but it is case-insensitive: ").lower().strip()
+        else:
+            ...
+        return action
+
+
+
+    def preflop(self):
+        contributions, current_bet, last_raise_amount, current_player_index = self.round_init()
+        while len(set(contributions.values())) != 1:
+            if not self.players_list[current_player_index].fold_status and contributions[current_player_index] < current_bet:
+                action = self.playerUI(self.players_list, current_player_index, current_bet, contributions, "preflop")
+                if action == "fold":
+                    del contributions[current_player_index]
+                    self.players_list[current_player_index].fold_status = True
+                elif action == "call":
+                    amount = current_bet-contributions[current_player_index]
+                    contributions = self.game_update(amount, current_player_index, self.players_list[current_player_index])
+                elif action == "raise":
+                    ...
+            current_player_index = (current_player_index + 1) % self.player_num
 
     def game_update(self, amount, contributions, player_index, player_object):
         contributions[player_index] += amount
         self.pot += amount
         player_object.money -= amount
-        return contributions, player_object
-
-        
-
+        return contributions
 
     def postflop(self):
         ...

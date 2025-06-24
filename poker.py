@@ -90,13 +90,14 @@ class PokerGame:
         for player in self.players_list:
             player.hole_cards = []
             player.fold_status = False
+        self.deck = Deck()
+        self.deck.shuffle()
 
     def play(self): # This is the flow of the game
         while self.quit != "q":
+            self.active_players = self.player_num
             self.movebutton()
             self.reset()
-            self.deck = Deck() 
-            self.deck.shuffle() 
             self.deal()
             self.preflop()
             self.quit = input("Press q to quit, any other button to continue: ").lower().strip()
@@ -107,17 +108,17 @@ class PokerGame:
         self.pot = self.big_blind_amount + self.small_blind_amount
         contributions[self.small_blind_player] += self.small_blind_amount
         contributions[self.big_blind_player] += self.big_blind_amount
-        current_bet = self.big_blind_amount
-        last_raise_amount = 0
+        current_bet = last_raise_amount = self.big_blind_amount
+        
         current_player_index = self.utg_player
         return contributions, current_bet, last_raise_amount, current_player_index
     
-    def playerUI(self, player_object, current_player_index, current_bet, contributions, type): # This is all the code relating to what each player will see during their turn
+    def playerUI(self, player, player_contributions, current_bet, type): # This is all the code relating to what each player will see during their turn
         clear_screen()
-        input(f"{player_object[current_player_index].name}, it is now your turn. Please step forward and press enter to continue: ")
-        print(f"Hole cards: {player_object[current_player_index].hole_cards}", end="\n\n")
+        input(f"{player.name}, it is now your turn. Please step forward and press enter to continue: ")
+        print(f"Hole cards: {player.hole_cards}", end="\n\n")
         if type == "preflop":
-            print(f"Actions: Call({current_bet-contributions[current_player_index]})  Raise  Fold")
+            print(f"Actions: Call({current_bet-player_contributions})  Raise  Fold")
             action = input("Please input your desired action (call, raise, fold). Keep in mind the spelling, but it is case-insensitive: ").lower().strip()
             valid_moves = ["call", "fold", "raise"]
             while action not in valid_moves:
@@ -127,25 +128,40 @@ class PokerGame:
             ...
         return action
 
-    def game_update(self, amount, contributions, player_index, player_object): # Updates the player and pot amount after bettng
-        contributions[player_index] += amount
+    def game_update(self, amount, contributions, current_player_index, player): # Updates the player and pot amount after bettng
+        contributions[current_player_index] += amount
         self.pot += amount
-        player_object.money -= amount
+        player.money -= amount
         return contributions
 
     def preflop(self): # This is the logic for the preflop rounds, which is used in self.game as one of the game rounds
         contributions, current_bet, last_raise_amount, current_player_index = self.round_init()
-        while len(set(contributions.values())) > 1 or :
-            if not self.players_list[current_player_index].fold_status and contributions[current_player_index] < current_bet:
-                action = self.playerUI(self.players_list, current_player_index, current_bet, contributions, "preflop")
+        while len(set(contributions.values())) > 1 and self.active_players > 1:
+            player = self.players_list[current_player_index]
+            player_contributions = contributions[current_player_index]
+            if not player.fold_status and player_contributions < current_bet:
+                action = self.playerUI(player, player_contributions, current_bet, "preflop")
                 if action == "fold":
                     del contributions[current_player_index]
-                    self.players_list[current_player_index].fold_status = True
+                    player.fold_status = True
+                    self.active_players -= 1
                 elif action == "call":
-                    amount = current_bet-contributions[current_player_index]
-                    contributions = self.game_update(amount, current_player_index, self.players_list[current_player_index])
+                    amount = current_bet-player_contributions
+                    contributions = self.game_update(amount, contributions, current_player_index, player)
                 elif action == "raise":
-                    ...
+                    while True:
+                        try:
+                            raise_to = int(input(f"Please input the amount you want to raise to (Min: {current_bet + last_raise_amount}, Max: {player_contributions + player.money})"))
+                            if current_bet + last_raise_amount <= raise_to <= player_contributions + player.money:
+                                break
+                            else:
+                                print("Please input a valid amount within the allowed range.")
+                        except ValueError:
+                            print("Please input a number")
+                    last_raise_amount = raise_to - current_bet
+                    current_bet = raise_to
+                    amount = current_bet-player_contributions
+                    contributions = self.game_update(amount, contributions, current_player_index, player)
             current_player_index = (current_player_index + 1) % self.player_num
 
     def postflop(self):

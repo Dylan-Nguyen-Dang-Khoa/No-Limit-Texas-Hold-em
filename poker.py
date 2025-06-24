@@ -73,32 +73,36 @@ class PokerGame:
         self.utg_player is the position of the player after the big blind in self.players_list
         """ 
         
-    def deal(self):
+    def deal(self): # Deal cards to each player one at a time until everyone has 2
         for _ in range(2):
             for player in self.players_list:
                 player.hole_cards.append(self.deck.deal_card())
 
-    def movebutton(self):
+    def movebutton(self): # Move the dealer, blinds and under the gun player
         self.button_player = (self.button_player+1) % self.player_num
         self.small_blind_player = (self.button_player + 1) % self.player_num
         self.big_blind_player = (self.button_player + 2) % self.player_num
         self.utg_player = (self.button_player + 3) % self.player_num
 
-    def play(self):
+    def reset(self): # Reset after showdown for next set of rounds
+        self.pot = 0
+        self.community = []
+        for player in self.players_list:
+            player.hole_cards = []
+            player.fold_status = False
+
+    def play(self): # This is the flow of the game
         while self.quit != "q":
-            self.pot = 0
-            self.community = []
-            for player in self.players_list:
-                player.hole_cards = []
-                player.fold_status = False
+            self.movebutton()
+            self.reset()
             self.deck = Deck() 
             self.deck.shuffle() 
             self.deal()
             self.preflop()
             self.quit = input("Press q to quit, any other button to continue: ").lower().strip()
-            self.movebutton()
 
-    def round_init(self):
+
+    def round_init(self): # Initialise the betting round
         contributions = {key:0 for key in range(self.player_num)}
         self.pot = self.big_blind_amount + self.small_blind_amount
         contributions[self.small_blind_player] += self.small_blind_amount
@@ -108,7 +112,7 @@ class PokerGame:
         current_player_index = self.utg_player
         return contributions, current_bet, last_raise_amount, current_player_index
     
-    def playerUI(self, player_object, current_player_index, current_bet, contributions, type):
+    def playerUI(self, player_object, current_player_index, current_bet, contributions, type): # This is all the code relating to what each player will see during their turn
         clear_screen()
         input(f"{player_object[current_player_index].name}, it is now your turn. Please step forward and press enter to continue: ")
         print(f"Hole cards: {player_object[current_player_index].hole_cards}", end="\n\n")
@@ -123,15 +127,15 @@ class PokerGame:
             ...
         return action
 
-    def game_update(self, amount, contributions, player_index, player_object):
+    def game_update(self, amount, contributions, player_index, player_object): # Updates the player and pot amount after bettng
         contributions[player_index] += amount
         self.pot += amount
         player_object.money -= amount
         return contributions
 
-    def preflop(self):
+    def preflop(self): # This is the logic for the preflop rounds, which is used in self.game as one of the game rounds
         contributions, current_bet, last_raise_amount, current_player_index = self.round_init()
-        while len(set(contributions.values())) != 1:
+        while len(set(contributions.values())) > 1 or :
             if not self.players_list[current_player_index].fold_status and contributions[current_player_index] < current_bet:
                 action = self.playerUI(self.players_list, current_player_index, current_bet, contributions, "preflop")
                 if action == "fold":
@@ -147,7 +151,7 @@ class PokerGame:
     def postflop(self):
         ...
 
-    def player_num_init(self):
+    def player_num_init(self): # Check if the number of players is valid and initialises it at the beginning of everything
         self.player_num = None
         while self.player_num is None or not 3 <= self.player_num <= 10:
             try:
@@ -155,7 +159,7 @@ class PokerGame:
             except ValueError:
                 print("Please input a number")
     
-    def blinds_init(self):
+    def blinds_init(self): # Check if the blind amount is valid and intialises it as the beginning of everything
         self.big_blind_amount = None
         while self.big_blind_amount is None or not self.big_blind_amount >= 2:
             try:

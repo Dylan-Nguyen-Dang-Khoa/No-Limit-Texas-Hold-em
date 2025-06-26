@@ -111,8 +111,10 @@ class PokerGame:
                     self.postflop()
                 else:
                     break
-            self.active_players_cards = [self.players_list[player_index].hole_cards for player_index in range(self.player_num) if not self.players_list[player_index].fold_status]
             self.active_players_list = [player_index for player_index in range(self.player_num) if not self.players_list[player_index].fold_status]
+            self.active_players_cards = [self.players_list[player_index].hole_cards for player_index in self.active_players_list]
+            print(self.active_players_list)
+            print(self.active_players_cards)
             hand_evaluation = HandEvaluator(self.active_players_cards, self.community_cards, self.active_players_list)
             winner = hand_evaluation.evaluate()
             self.players_list[winner].money += winner
@@ -124,7 +126,7 @@ class PokerGame:
         input(f"{player.name}, it is now your turn. Please step forward and press enter to continue: ")
         print(f"Community Cards: {self.community_cards}")
         print(f"Hole cards: {player.hole_cards}")
-        print(f"Balance {player.money}", end="\n\n")
+        print(f"Balance: {player.money}", end="\n\n")
         if type == "preflop no check":
             print(f"Actions: Call({current_bet-player_contributions})  Raise  Fold")
             action = input("Please input your desired action (call, raise, fold). Keep in mind the spelling, but it is case-insensitive: ").lower().strip()
@@ -183,8 +185,8 @@ class PokerGame:
         while self.active_players > 1 and (len(set(contributions.values())) > 1 or players_played < self.active_players):
             player = self.players_list[current_player_index]
             player_contributions = contributions[current_player_index]
-            if not player.fold_status and player_contributions < current_bet:
-                if player_contributions != current_bet:
+            if not player.fold_status:
+                if player_contributions < current_bet:
                     action = self.playerUI(player, player_contributions, current_bet, "preflop no check")
                 else:
                     action = self.playerUI(player, player_contributions, current_bet, "preflop check")
@@ -300,7 +302,7 @@ class HandEvaluator:
         
 
     def evaluate(self):
-        
+        ...
     
         
 

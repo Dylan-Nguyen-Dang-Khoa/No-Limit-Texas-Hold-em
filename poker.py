@@ -1,4 +1,5 @@
 from random import shuffle, randint
+from itertools import combinations
 import os
 
 
@@ -128,12 +129,14 @@ class PokerGame:
             if self.active_players > 1:
                 for i in range(3):
                     self.community_cards.append(self.deck.deal_card())
+                clear_screen()
                 print(f"Community Cards: {self.community_cards}")
                 input("Press enter to continue: ")
                 self.postflop()
             for i in range(2):
                 if self.active_players > 1:
                     self.community_cards.append(self.deck.deal_card())
+                    clear_screen()
                     print(f"Community Cards: {self.community_cards}")
                     input("Press enter to continue: ")
                     self.postflop()
@@ -144,19 +147,19 @@ class PokerGame:
                 for player_index in range(self.player_num)
                 if not self.players_list[player_index].fold_status
             ]
-            self.active_players_cards = [
-                self.players_list[player_index].hole_cards
-                for player_index in self.active_players_list
-            ]
-            print(self.active_players_list)
-            print(self.active_players_cards)
-            hand_evaluation = HandEvaluator(
-                self.active_players_cards,
-                self.community_cards,
-                self.active_players_list,
-            )
-            winner = hand_evaluation.evaluate()
-            self.players_list[winner].money += winner
+            if len(self.active_players_list) == 1:
+                self.players_list[self.active_players_list[0]].money += self.pot
+            else:
+                self.active_players_cards = {
+                    player_index: self.players_list[player_index].hole_cards
+                    for player_index in self.active_players_list
+                }
+                hand_evaluation = HandEvaluator(
+                    self.active_players_cards,
+                    self.community_cards,
+                )
+                winner = hand_evaluation.evaluate()
+                self.players_list[winner].money += winner
             self.quit = (
                 input("Press q to quit, any other button to continue: ").lower().strip()
             )
@@ -473,11 +476,81 @@ class PokerGame:
 
 
 class HandEvaluator:
-    def __init__(self, showdown_cards, community_cards):
-        self.showdown_cards = showdown_cards
+    rank_to_value = {
+        "2": 2,
+        "3": 3,
+        "4": 4,
+        "5": 5,
+        "6": 6,
+        "7": 7,
+        "8": 8,
+        "9": 9,
+        "10": 10,
+        "Jack": 11,
+        "Queen": 12,
+        "King": 13,
+        "Ace": 14,
+    }
+    def __init__(self, player_cards_dict, community_cards):
+        self.player_cards_dict = player_cards_dict
         self.community_cards = community_cards
 
-    def evaluate(self): ...
+    def evaluate(self):
+        winner_hand_score = -1
+        for player_index, player_cards in self.player_cards_dict.items():
+            cards = self.community_cards + player_cards
+            card_combinations = combinations(cards, 5)
+            for card_combination in card_combinations:
+                card_ranks = [self.rank_to_value[card.rank] for card in card_combination]
+                card_suits = [card.suit for card in card_combination]
+                if self.is_straight(card_ranks) and self.is_flush(
+                    card_suits
+                ):  # Check straight flush
+                    if 8 > winner_hand_score:
+                        winner = [{player_index: card_combination}]
+                        winner_hand_score = 8
+                    elif 8 == winner_hand_score:
+                        winner.append({player_index: card_combination})
+                elif self.is_four_of_a_kind(card_combination):  # Check four of a kind
+                    if 7 > winner_hand_score:
+                        winner = [{player_index: card_combination}]
+                        winner_hand_score = 7
+                    elif 7 == winner_hand_score:
+                        winner.append({player_index: card_combination})
+                elif self.is_full_house(card_combination): # Check full house
+                    if 6 > winner_hand_score:
+                        winner = [{player_index: card_combination}]
+                        winner_hand_score = 6
+                    elif 6 == winner_hand_score:
+                        winner[player_index] = card_combination
+
+    def is_straight(self, card_ranks):
+        card_ranks.sort()
+        return all(
+            card_ranks[card + 1] == card_ranks[card] + 1
+            for card in range(len(card_ranks) - 1)
+        )
+
+    def is_flush(self, card_suits):
+        return len(set(card_suits)) == 1
+
+    def card_frequency_check(self, card_ranks, frequency_wanted):
+        frequencies = {}
+        for card_rank in card_ranks:
+            frequencies[card_rank] = frequencies.get(card_rank, 0) + 1
+        if frequency_wanted in frequencies.values():
+            return True
+        else:
+            return False
+
+    def is_four_of_a_kind(self, card_ranks):
+        return self.card_frequency_check(card_ranks, 4)
+    
+    def is_full_house(self, card_ranks):
+        return self.card_frequency_check(card_ranks, 3) and self.card_frequency_check(card_ranks, 2)
+
+
+
 
 
 def main():

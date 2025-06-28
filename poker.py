@@ -491,38 +491,129 @@ class HandEvaluator:
         "King": 13,
         "Ace": 14,
     }
+
     def __init__(self, player_cards_dict, community_cards):
         self.player_cards_dict = player_cards_dict
         self.community_cards = community_cards
 
+    def add_winner(
+        self,
+        winners_list,
+        winners_hand_score,
+        hand_score,
+        player_index,
+        tie_breaker_comparison,
+    ):
+        if hand_score > winners_hand_score:
+            winners_list = [{player_index: tie_breaker_comparison}]
+            winners_hand_score = hand_score
+        elif hand_score == winners_hand_score:
+            winners_list.append({player_index: tie_breaker_comparison})
+        return winners_hand_score, winners_list
+
     def evaluate(self):
-        winner_hand_score = -1
+        winners_hand_score = -1
+        winners_list = []
         for player_index, player_cards in self.player_cards_dict.items():
             cards = self.community_cards + player_cards
             card_combinations = combinations(cards, 5)
             for card_combination in card_combinations:
-                card_ranks = [self.rank_to_value[card.rank] for card in card_combination]
+                card_ranks = [
+                    self.rank_to_value[card.rank] for card in card_combination
+                ]
                 card_suits = [card.suit for card in card_combination]
                 if self.is_straight(card_ranks) and self.is_flush(
                     card_suits
-                ):  # Check straight flush
-                    if 8 > winner_hand_score:
-                        winner = [{player_index: card_combination}]
-                        winner_hand_score = 8
-                    elif 8 == winner_hand_score:
-                        winner.append({player_index: card_combination})
-                elif self.is_four_of_a_kind(card_combination):  # Check four of a kind
-                    if 7 > winner_hand_score:
-                        winner = [{player_index: card_combination}]
-                        winner_hand_score = 7
-                    elif 7 == winner_hand_score:
-                        winner.append({player_index: card_combination})
-                elif self.is_full_house(card_combination): # Check full house
-                    if 6 > winner_hand_score:
-                        winner = [{player_index: card_combination}]
-                        winner_hand_score = 6
-                    elif 6 == winner_hand_score:
-                        winner[player_index] = card_combination
+                ):  # Check for straight flush
+                    tie_breaker_comparison = sorted(card_ranks, reverse=True)
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        8,
+                        player_index,
+                        tie_breaker_comparison,
+                    )
+                elif self.card_frequency_check(
+                    card_ranks, 4
+                ):  # Check for four of a kind
+                    tie_breaker_comparison = 
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        7,
+                        player_index,
+                        card_combination,
+                    )
+                elif self.card_frequency_check(
+                    card_ranks, 3
+                ) and self.card_frequency_check(
+                    card_ranks, 2
+                ):  # Check for full house
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        6,
+                        player_index,
+                        card_combination,
+                    )
+                elif self.is_flush(card_combination):  # Check for flush
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        5,
+                        player_index,
+                        card_combination,
+                    )
+                elif self.is_straight(card_combination):  # Check for straight
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        4,
+                        player_index,
+                        card_combination,
+                    )
+                elif self.card_frequency_check(
+                    card_ranks, 3
+                ):  # Check for three of a kind
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        3,
+                        player_index,
+                        card_combination,
+                    )
+                elif self.two_pair_check(card_ranks):  # Check for two pair
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        2,
+                        player_index,
+                        card_combination,
+                    )
+                elif self.card_frequency_check(
+                    card_ranks, 2, False
+                ):  # Check for one pair
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        1,
+                        player_index,
+                        card_combination,
+                    )
+                else:  # You got high card
+                    winners_hand_score, winners_list = self.add_winner(
+                        winners_list,
+                        winners_hand_score,
+                        0,
+                        player_index,
+                        card_combination,
+                    )
+
+        if len(winners_list) == 1:
+            return next(iter(winners_list[0]))
+        else:
+            return self.winner_tiebreaker(self, winners_list)
+
 
     def is_straight(self, card_ranks):
         card_ranks.sort()
@@ -538,20 +629,28 @@ class HandEvaluator:
         frequencies = {}
         for card_rank in card_ranks:
             frequencies[card_rank] = frequencies.get(card_rank, 0) + 1
-        if frequency_wanted in frequencies.values():
-            return True
         else:
-            return False
+            if frequency_wanted in frequencies.values():
+                return True
+            else:
+                return False
 
-    def is_four_of_a_kind(self, card_ranks):
-        return self.card_frequency_check(card_ranks, 4)
-    
-    def is_full_house(self, card_ranks):
-        return self.card_frequency_check(card_ranks, 3) and self.card_frequency_check(card_ranks, 2)
+    def two_pair_check(self, card_ranks):
 
+        frequencies = {}
+        for card_rank in card_ranks:
+            frequencies[card_rank] = frequencies.get(card_rank, 0) + 1
+        two_count = 0
+        for frequency in frequencies.values():
+            if frequency == 2:
+                two_count += 1
+        return two_count == 2
 
-
-
+    def winner_tiebreaker(self, winners_list, winners_hand_score):
+        winner = -1
+        for player_dict in winners_list:
+            [(player, card_combination)] = player_dict.items()
+            if winners_hand_score == 
 
 def main():
     game = PokerGame()

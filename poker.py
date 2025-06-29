@@ -589,7 +589,7 @@ class HandEvaluator:
                         card_ranks,
                     )
                 elif self.card_frequency_check(
-                    card_ranks, 2, False
+                    card_ranks, 2
                 ):  # Check for one pair
                     winners_hand_score, winners_list = self.add_winner(
                         winners_list,
@@ -649,6 +649,20 @@ class HandEvaluator:
         sorted_ranks += sorted(set(card_ranks), reverse=True)
         return sorted_ranks
 
+    def frequency_tiebreaker(self, card_ranks, player_index, frequency):
+        sorted_ranks = [player_index]
+        frequencies = {}
+        for card_rank in card_ranks:
+            frequencies[card_rank] = frequencies.get(card_rank, 0) + 1
+        for card in frequencies:
+            if frequencies[card] == frequency:
+                sorted_ranks.append(card)
+                break
+        while card in card_ranks:
+            card_ranks.remove(card)
+        sorted_ranks += sorted(set(card_ranks, reverse=True))
+        return sorted_ranks
+
     def winner_tiebreaker(self, winners_list, winners_hand_score):
         winner = -1
         tie_breaker_comparisons = []
@@ -656,12 +670,11 @@ class HandEvaluator:
         if winners_hand_score in highest_card_tiebreaker:
             for player_dict in winners_list:
                 player_index, card_ranks = next(iter(player_dict.items()))
-                tie_breaker_comparisons.append(highest_card_tiebreaker(card_ranks))
-        else:
+                tie_breaker_comparisons.append(highest_card_tiebreaker(card_ranks, player_index))
+        elif winners_hand_score != 2:
             for player_dict in winners_list:
-                
-                
-            
+                player_index, card_ranks = next(iter(player_dict.items()))
+                tie_breaker_comparisons.append()
 
 def main():
     game = PokerGame()

@@ -649,7 +649,9 @@ class HandEvaluator:
         sorted_ranks = [player_index]
         frequencies = {}
         for card_rank in card_ranks:
-            frequencies[card_rank] = frequencies.get(card_rank, 0) + 1 # {3: 1, 13: 2, 4: 1, 5: 1}
+            frequencies[card_rank] = (
+                frequencies.get(card_rank, 0) + 1
+            )  # {3: 1, 13: 2, 4: 1, 5: 1}
         for rank in frequencies:
             if frequencies[rank] == frequency:
                 sorted_ranks.append(rank)
@@ -686,7 +688,9 @@ class HandEvaluator:
         elif winners_hand_score == 2:
             for player_dict in winners_list:
                 player_index, card_ranks = next(iter(player_dict.items()))
-                tie_breaker_comparisons.append(self.two_pair_tiebreaker(card_ranks, player_index))
+                tie_breaker_comparisons.append(
+                    self.two_pair_tiebreaker(card_ranks, player_index)
+                )
         else:
             for player_dict in winners_list:
                 player_index, card_ranks = next(iter(player_dict.items()))
@@ -696,12 +700,15 @@ class HandEvaluator:
                     frequency = 3
                 else:
                     frequency = 2
-                tie_breaker_comparisons.append(self.n_of_a_kind_tiebreaker(card_ranks, player_index, frequency))
+                tie_breaker_comparisons.append(
+                    self.n_of_a_kind_tiebreaker(card_ranks, player_index, frequency)
+                )
 
 
 def main():
     game = PokerGame()
     game.play()
 
-if __name__ == "__main__":  
+
+if __name__ == "__main__":
     main()

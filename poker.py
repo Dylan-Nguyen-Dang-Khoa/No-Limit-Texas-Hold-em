@@ -502,13 +502,13 @@ class HandEvaluator:
         winners_hand_score,
         hand_score,
         player_index,
-        tie_breaker_comparison,
+        card_ranks,
     ):
         if hand_score > winners_hand_score:
-            winners_list = [{player_index: tie_breaker_comparison}]
+            winners_list = [{player_index: card_ranks}]
             winners_hand_score = hand_score
         elif hand_score == winners_hand_score:
-            winners_list.append({player_index: tie_breaker_comparison})
+            winners_list.append({player_index: card_ranks})
         return winners_hand_score, winners_list
 
     def evaluate(self):
@@ -525,24 +525,22 @@ class HandEvaluator:
                 if self.is_straight(card_ranks) and self.is_flush(
                     card_suits
                 ):  # Check for straight flush
-                    tie_breaker_comparison = sorted(card_ranks, reverse=True)
                     winners_hand_score, winners_list = self.add_winner(
                         winners_list,
                         winners_hand_score,
                         8,
                         player_index,
-                        tie_breaker_comparison,
+                        card_ranks,
                     )
                 elif self.card_frequency_check(
                     card_ranks, 4
                 ):  # Check for four of a kind
-                    tie_breaker_comparison = 
                     winners_hand_score, winners_list = self.add_winner(
                         winners_list,
                         winners_hand_score,
                         7,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
                 elif self.card_frequency_check(
                     card_ranks, 3
@@ -554,7 +552,7 @@ class HandEvaluator:
                         winners_hand_score,
                         6,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
                 elif self.is_flush(card_combination):  # Check for flush
                     winners_hand_score, winners_list = self.add_winner(
@@ -562,7 +560,7 @@ class HandEvaluator:
                         winners_hand_score,
                         5,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
                 elif self.is_straight(card_combination):  # Check for straight
                     winners_hand_score, winners_list = self.add_winner(
@@ -570,7 +568,7 @@ class HandEvaluator:
                         winners_hand_score,
                         4,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
                 elif self.card_frequency_check(
                     card_ranks, 3
@@ -580,7 +578,7 @@ class HandEvaluator:
                         winners_hand_score,
                         3,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
                 elif self.two_pair_check(card_ranks):  # Check for two pair
                     winners_hand_score, winners_list = self.add_winner(
@@ -588,7 +586,7 @@ class HandEvaluator:
                         winners_hand_score,
                         2,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
                 elif self.card_frequency_check(
                     card_ranks, 2, False
@@ -598,7 +596,7 @@ class HandEvaluator:
                         winners_hand_score,
                         1,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
                 else:  # You got high card
                     winners_hand_score, winners_list = self.add_winner(
@@ -606,7 +604,7 @@ class HandEvaluator:
                         winners_hand_score,
                         0,
                         player_index,
-                        card_combination,
+                        card_ranks,
                     )
 
         if len(winners_list) == 1:
@@ -646,11 +644,24 @@ class HandEvaluator:
                 two_count += 1
         return two_count == 2
 
+    def highest_card_tiebreaker(self, card_ranks, player_index):
+        sorted_ranks = [player_index]
+        sorted_ranks += sorted(set(card_ranks), reverse=True)
+        return sorted_ranks
+
     def winner_tiebreaker(self, winners_list, winners_hand_score):
         winner = -1
-        for player_dict in winners_list:
-            [(player, card_combination)] = player_dict.items()
-            if winners_hand_score == 
+        tie_breaker_comparisons = []
+        highest_card_tiebreaker = [8, 5, 4, 0]
+        if winners_hand_score in highest_card_tiebreaker:
+            for player_dict in winners_list:
+                player_index, card_ranks = next(iter(player_dict.items()))
+                tie_breaker_comparisons.append(highest_card_tiebreaker(card_ranks))
+        else:
+            for player_dict in winners_list:
+                
+                
+            
 
 def main():
     game = PokerGame()

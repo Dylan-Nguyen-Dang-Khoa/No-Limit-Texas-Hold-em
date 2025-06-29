@@ -554,7 +554,7 @@ class HandEvaluator:
                         player_index,
                         card_ranks,
                     )
-                elif self.is_flush(card_combination):  # Check for flush
+                elif self.is_flush(card_suits):  # Check for flush
                     winners_hand_score, winners_list = self.add_winner(
                         winners_list,
                         winners_hand_score,
@@ -562,7 +562,7 @@ class HandEvaluator:
                         player_index,
                         card_ranks,
                     )
-                elif self.is_straight(card_combination):  # Check for straight
+                elif self.is_straight(card_ranks):  # Check for straight
                     winners_hand_score, winners_list = self.add_winner(
                         winners_list,
                         winners_hand_score,
@@ -611,7 +611,7 @@ class HandEvaluator:
             return self.winner_tiebreaker(self, winners_list)
 
     def is_straight(self, card_ranks):
-        card_ranks.sort()
+        card_ranks = sorted(card_ranks)
         return all(
             card_ranks[card + 1] == card_ranks[card] + 1
             for card in range(len(card_ranks) - 1)
@@ -694,5 +694,5 @@ def main():
     game = PokerGame()
     game.play()
 
-
-main()
+if __name__ == "__main__":  
+    main()

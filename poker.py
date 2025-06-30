@@ -605,10 +605,10 @@ class HandEvaluator:
                         card_ranks,
                     )
 
-        if len(winners_list) == 1:
+        if len(set(list(winner.keys())[0] for winner in winners_list)) == 1:
             return next(iter(winners_list[0]))
         else:
-            return self.winner_tiebreaker(self, winners_list)
+            return self.winner_tiebreaker(winners_list, winners_hand_score)
 
     def is_straight(self, card_ranks):
         card_ranks = sorted(card_ranks)
@@ -676,7 +676,7 @@ class HandEvaluator:
         return sorted_ranks
 
     def winner_tiebreaker(self, winners_list, winners_hand_score):
-        winner = -1
+        winner_hand_score = -1
         tie_breaker_comparisons = []
         highest_card_tiebreaker = [8, 5, 4, 0]
         if winners_hand_score in highest_card_tiebreaker:

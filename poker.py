@@ -321,6 +321,7 @@ class PokerGame:
                     del contributions[current_player_index]
                     player.fold_status = True
                     self.active_players -= 1
+                    players_played -= 1
                 elif action == "call":
                     amount = current_bet - player_contributions
                     contributions = self.game_update(

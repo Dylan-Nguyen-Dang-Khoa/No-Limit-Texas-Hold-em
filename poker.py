@@ -160,6 +160,11 @@ class PokerGame:
                 )
                 winner = hand_evaluation.evaluate()
                 self.players_list[winner].money += winner
+            print(f"The winner is {self.players_list[winner]}")
+            print(self.community_cards)
+            for player in self.players_list:
+                if not player.fold_status:
+                    print(f"{player.name}'s hole cards are {player.hole_cards} and has ${player.money}")
             self.quit = (
                 input("Press q to quit, any other button to continue: ").lower().strip()
             )

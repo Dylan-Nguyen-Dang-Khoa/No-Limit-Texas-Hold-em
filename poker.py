@@ -682,10 +682,8 @@ class HandEvaluator:
         return sorted_ranks
 
     def winner_tiebreaker(self, winners_list, winners_hand_score):
-        winner_hand_score = -1
         tie_breaker_comparisons = []
-        highest_card_tiebreaker = [8, 5, 4, 0]
-        if winners_hand_score in highest_card_tiebreaker:
+        if winners_hand_score in [8, 5, 4, 0]:
             for player_dict in winners_list:
                 player_index, card_ranks = next(iter(player_dict.items()))
                 tie_breaker_comparisons.append(
@@ -709,6 +707,18 @@ class HandEvaluator:
                 tie_breaker_comparisons.append(
                     self.n_of_a_kind_tiebreaker(card_ranks, player_index, frequency)
                 )
+        for i in range(1, len(tie_breaker_comparisons[0])):
+            for player in tie_breaker_comparisons:
+                winner = []
+                max = 0
+                if player[i] > max:
+                    max = player[i]
+                    winner = [player[0]]
+                elif player[i] == max:
+                    winner.append(player[0])
+            if len(winner) == 1:
+                return winner
+        return winner
 
 
 def main():

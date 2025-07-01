@@ -158,13 +158,10 @@ class PokerGame:
                     self.active_players_cards,
                     self.community_cards,
                 )
-                winner = hand_evaluation.evaluate()
-                self.players_list[winner].money += winner
-            print(f"The winner is {self.players_list[winner]}")
-            print(self.community_cards)
-            for player in self.players_list:
-                if not player.fold_status:
-                    print(f"{player.name}'s hole cards are {player.hole_cards} and has ${player.money}")
+                winners, num_winner = hand_evaluation.evaluate()
+                for winner in winners:
+                    self.players_list[winner] += self.pot//num_winner
+                    print(f"{self.players_list[winner].name} won {self.pot//num_winner}")
             self.quit = (
                 input("Press q to quit, any other button to continue: ").lower().strip()
             )
@@ -612,7 +609,7 @@ class HandEvaluator:
                     )
 
         if len(set(list(winner.keys())[0] for winner in winners_list)) == 1:
-            return next(iter(winners_list[0]))
+            return [next(iter(winners_list[0]))]
         else:
             return self.winner_tiebreaker(winners_list, winners_hand_score)
 

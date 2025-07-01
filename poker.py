@@ -609,7 +609,7 @@ class HandEvaluator:
                     )
 
         if len(set(list(winner.keys())[0] for winner in winners_list)) == 1:
-            return [next(iter(winners_list[0]))]
+            return [next(iter(winners_list[0]))], 1
         else:
             return self.winner_tiebreaker(winners_list, winners_hand_score)
 
@@ -714,8 +714,8 @@ class HandEvaluator:
                 elif player[i] == max:
                     winner.append(player[0])
             if len(winner) == 1:
-                return winner
-        return winner
+                return winner, len(winner)
+        return winner, len(winner)
 
 
 def main():

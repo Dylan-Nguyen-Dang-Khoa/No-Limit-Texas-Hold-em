@@ -677,10 +677,8 @@ class HandEvaluator:
         return sorted_ranks
 
     def winner_tiebreaker(self, winners_list, winners_hand_score):
-        winner_hand_score = -1
         tie_breaker_comparisons = []
-        highest_card_tiebreaker = [8, 5, 4, 0]
-        if winners_hand_score in highest_card_tiebreaker:
+        if winners_hand_score in [8, 5, 4, 0]:
             for player_dict in winners_list:
                 player_index, card_ranks = next(iter(player_dict.items()))
                 tie_breaker_comparisons.append(

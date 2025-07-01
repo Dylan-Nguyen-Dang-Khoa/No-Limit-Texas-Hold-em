@@ -704,6 +704,18 @@ class HandEvaluator:
                 tie_breaker_comparisons.append(
                     self.n_of_a_kind_tiebreaker(card_ranks, player_index, frequency)
                 )
+        for i in range(1, len(tie_breaker_comparisons[0])):
+            for player in tie_breaker_comparisons:
+                winner = []
+                max = 0
+                if player[i] > max:
+                    max = player[i]
+                    winner = [player[0]]
+                elif player[i] == max:
+                    winner.append(player[0])
+            if len(winner) == 1:
+                return winner
+        return winner
 
 
 def main():

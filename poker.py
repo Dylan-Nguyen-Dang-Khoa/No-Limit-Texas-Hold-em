@@ -153,7 +153,7 @@ class PokerGame:
             else:
                 self.active_players_cards = {
                     player_index: self.players_list[player_index].hole_cards
-                    for player_index in self.active_players_list
+                    for player_index in active_players_list
                 }
                 hand_evaluation = HandEvaluator(
                     self.active_players_cards,
@@ -184,7 +184,7 @@ class PokerGame:
         print(f"Community Cards: {self.community_cards}")
         print(f"Pot: ${self.pot}", end="\n\n")
         if type == "preflop no check":
-            print(f"Actions: Call(${current_bet-player_contributions})  Raise  Fold")
+            print(f"Actions: Call(${min(current_bet-player_contributions, player.money)})  Raise  Fold")
             action = (
                 input(
                     "Please input your desired action (call, raise, fold). Keep in mind the spelling, but it is case-insensitive: "
@@ -224,7 +224,7 @@ class PokerGame:
         else:
             if current_bet == 0:
                 print(
-                    f"Actions: Check  Bet(Min: ${self.big_blind_amount}, Max: ${player.money})  Fold"
+                    f"Actions: Check  Bet(Min: ${min(self.big_blind_amount, player.money)}, Max: ${player.money})  Fold"
                 )
                 action = (
                     input(
@@ -245,7 +245,7 @@ class PokerGame:
                     )
             else:
                 print(
-                    f"Actions: Call(${current_bet-player_contributions})  Raise  Fold"
+                    f"Actions: Call(${min(current_bet-player_contributions, player.money)})  Raise  Fold"
                 )
                 action = (
                     input(
@@ -314,7 +314,7 @@ class PokerGame:
             len(set(contributions.values())) > 1 or players_played < self.active_players
         ):
             player = self.players_list[current_player_index]
-            if not player.fold_status:
+            if not player.fold_status and player.money > 0:
                 player_contributions = contributions[current_player_index]
                 if player_contributions < current_bet:
                     action = self.playerUI(
@@ -330,7 +330,7 @@ class PokerGame:
                     self.active_players -= 1
                     players_played -= 1
                 elif action == "call":
-                    amount = current_bet - player_contributions
+                    amount = min(current_bet - player_contributions, player.money)
                     contributions = self.game_update(
                         amount, contributions, current_player_index, player
                     )
@@ -379,7 +379,7 @@ class PokerGame:
             len(set(contributions.values())) > 1 or players_played < self.active_players
         ):
             player = self.players_list[current_player_index]
-            if not player.fold_status:
+            if not player.fold_status and player.money > 0:
                 player_contributions = contributions[current_player_index]
                 if player_contributions < current_bet or current_bet == 0:
                     action = self.playerUI(
@@ -392,7 +392,7 @@ class PokerGame:
                         try:
                             current_bet = int(
                                 input(
-                                    f"Please input the amount you want to bet (Min: {last_raise_amount}, Max: {player.money})"
+                                    f"Please input the amount you want to bet (Min: {last_raise_amount}, Max: {player.money}): "
                                 )
                             )
                             if last_raise_amount <= current_bet <= player.money:
@@ -411,7 +411,7 @@ class PokerGame:
                     self.active_players -= 1
                     players_played -= 1
                 elif action == "call":
-                    amount = current_bet - player_contributions
+                    amount = min(current_bet - player_contributions, player.money)
                     contributions = self.game_update(
                         amount, contributions, current_player_index, player
                     )

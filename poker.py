@@ -664,9 +664,10 @@ class HandEvaluator:
         for rank in frequencies:
             if frequencies[rank] == frequency:
                 sorted_ranks.append(rank)
-                card_ranks = list(card_ranks.keys()).remove(rank)
+                for _ in range(frequency):
+                    card_ranks = card_ranks.remove(rank)
                 break
-        sorted_ranks += sorted(set(card_ranks, reverse=True))
+        sorted_ranks += sorted(set(card_ranks), reverse=True)
         return sorted_ranks
 
     def two_pair_tiebreaker(self, card_ranks, player_index):

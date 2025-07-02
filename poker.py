@@ -149,6 +149,7 @@ class PokerGame:
             ]
             if len(self.active_players_list) == 1:
                 self.players_list[self.active_players_list[0]].money += self.pot
+                print(f"{self.active_players_list[0].name} won {self.pot}")
             else:
                 self.active_players_cards = {
                     player_index: self.players_list[player_index].hole_cards
@@ -160,8 +161,10 @@ class PokerGame:
                 )
                 winners, num_winner = hand_evaluation.evaluate()
                 for winner in winners:
-                    self.players_list[winner] += self.pot//num_winner
-                    print(f"{self.players_list[winner].name} won {self.pot//num_winner}")
+                    self.players_list[winner] += self.pot // num_winner
+                    print(
+                        f"{self.players_list[winner].name} won {self.pot//num_winner}"
+                    )
             self.quit = (
                 input("Press q to quit, any other button to continue: ").lower().strip()
             )

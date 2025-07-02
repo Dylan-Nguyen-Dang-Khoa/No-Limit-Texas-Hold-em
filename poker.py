@@ -20,7 +20,7 @@ class Player:
         self.fold_status = False
 
     def __str__(self):
-        return f"Name: {self.name}, Balance: {self.money}"
+        return f"Name: {self.name}, Balance: ${self.money}, Hole Cards: {self.hole_cards}"
 
     def __repr__(self):
         return str(self)
@@ -142,14 +142,14 @@ class PokerGame:
                     self.postflop()
                 else:
                     break
-            self.active_players_list = [
+            active_players_list = [
                 player_index
                 for player_index in range(self.player_num)
                 if not self.players_list[player_index].fold_status
             ]
-            if len(self.active_players_list) == 1:
-                self.players_list[self.active_players_list[0]].money += self.pot
-                print(f"{self.active_players_list[0].name} won {self.pot}")
+            if len(active_players_list) == 1:
+                self.players_list[active_players_list[0]].money += self.pot
+                print(f"{self.players_list[active_players_list[0]].name} won ${self.pot}")
             else:
                 self.active_players_cards = {
                     player_index: self.players_list[player_index].hole_cards
@@ -163,8 +163,10 @@ class PokerGame:
                 for winner in winners:
                     self.players_list[winner] += self.pot // num_winner
                     print(
-                        f"{self.players_list[winner].name} won {self.pot//num_winner}"
+                        f"{self.players_list[winner].name} won ${self.pot//num_winner}"
                     )
+            for player in self.players_list:
+                print(player)
             self.quit = (
                 input("Press q to quit, any other button to continue: ").lower().strip()
             )

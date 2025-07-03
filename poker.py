@@ -329,7 +329,7 @@ class PokerGame:
             len(set(contributions.values())) > 1 or players_played < self.active_players
         ):
             player = self.players_list[current_player_index]
-            if not player.fold_status and player.money > 0:
+            if not player.fold_status:
                 player_contributions = contributions[current_player_index]
                 if (player_contributions < current_bet) and player.money > 0:
                     action = self.playerUI(

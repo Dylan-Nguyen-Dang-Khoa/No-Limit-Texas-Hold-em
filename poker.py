@@ -150,6 +150,8 @@ class PokerGame:
                     self.postflop()
                 else:
                     break
+            clear_screen()
+            print(f"Community Cards: {self.community_cards}")
             active_players_list = [
                 player_index
                 for player_index in range(self.player_num)

@@ -645,7 +645,7 @@ class HandEvaluator:
 
     def highest_card_tiebreaker(self, card_ranks, player_index):
         sorted_ranks = [player_index]
-        sorted_ranks += sorted(set(card_ranks), reverse=True)
+        sorted_ranks += sorted(card_ranks, reverse=True)
         return sorted_ranks
 
     def n_of_a_kind_tiebreaker(self, card_ranks, player_index, frequency):
@@ -659,9 +659,9 @@ class HandEvaluator:
             if frequencies[rank] == frequency:
                 sorted_ranks.append(rank)
                 for _ in range(frequency):
-                    card_ranks = card_ranks.remove(rank)
+                    card_ranks.remove(rank)
                 break
-        sorted_ranks += sorted(set(card_ranks), reverse=True)
+        sorted_ranks += sorted(card_ranks, reverse=True)
         return sorted_ranks
 
     def two_pair_tiebreaker(self, card_ranks, player_index):

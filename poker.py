@@ -124,6 +124,12 @@ class PokerGame:
     def play(self):  # This is the flow of the game
         while self.quit != "q":
             print(f"The dealer is {self.players_list[self.button_player].name}")
+            print(
+                f"{self.players_list[self.small_blind_player].name} contributes ${self.small_blind_amount} to the pot for the small blind bet"
+            )
+            print(
+                f"{self.players_list[self.big_blind_player].name} contributes ${self.big_blind_amount} to the pot for the big blind bet"
+            )
             input("Press enter to continue: ")
             self.reset()
             self.deal()
@@ -170,7 +176,7 @@ class PokerGame:
                         f"{self.players_list[winner].name} won ${self.pot//num_winner}"
                     )
             temp_players_list = []
-            for index, player in enumerate(self.players_list):
+            for player in self.players_list:
                 print(player)
                 if not player.money > 0:
                     print(
@@ -181,7 +187,13 @@ class PokerGame:
             self.players_list = temp_players_list
             self.player_num = len(self.players_list)
             self.quit = (
-                input("Press q to quit, any other button to continue: ").lower().strip()
+                (
+                    input("Press q to quit, any other button to continue: ")
+                    .lower()
+                    .strip()
+                )
+                if self.player_num > 2
+                else "q"
             )
             self.movebutton()
 
@@ -356,11 +368,14 @@ class PokerGame:
                         try:
                             raise_to = int(
                                 input(
-                                    f"Please input the amount you want to raise to (Min: {current_bet + last_raise_amount}, Max: {player_contributions + player.money}): "
+                                    f"Please input the amount you want to raise to (Min: {min(current_bet + last_raise_amount, player.money + player_contributions)}, Max: {player_contributions + player.money}): "
                                 )
                             )
                             if (
-                                current_bet + last_raise_amount
+                                min(
+                                    current_bet + last_raise_amount,
+                                    player_contributions + player.money,
+                                )
                                 <= raise_to
                                 <= player_contributions + player.money
                             ):
@@ -411,7 +426,7 @@ class PokerGame:
                         try:
                             current_bet = int(
                                 input(
-                                    f"Please input the amount you want to bet (Min: {last_raise_amount}, Max: {player.money}): "
+                                    f"Please input the amount you want to bet (Min: {min(last_raise_amount, player.money)}, Max: {player.money}): "
                                 )
                             )
                             if last_raise_amount <= current_bet <= player.money:
@@ -439,11 +454,14 @@ class PokerGame:
                         try:
                             raise_to = int(
                                 input(
-                                    f"Please input the amount you want to raise to (Min: {current_bet + last_raise_amount}, Max: {player_contributions + player.money}): "
+                                    f"Please input the amount you want to raise to (Min: {min(current_bet + last_raise_amount, player_contributions + player.money)}, Max: {player_contributions + player.money}): "
                                 )
                             )
                             if (
-                                current_bet + last_raise_amount
+                                min(
+                                    current_bet + last_raise_amount,
+                                    player_contributions + player.money,
+                                )
                                 <= raise_to
                                 <= player_contributions + player.money
                             ):
@@ -732,7 +750,6 @@ class HandEvaluator:
                 )
         for i in range(1, len(tie_breaker_comparisons[0])):
             for player in tie_breaker_comparisons:
-                winner = []
                 max = 0
                 if player[i] > max:
                     max = player[i]
@@ -740,7 +757,7 @@ class HandEvaluator:
                 elif player[i] == max:
                     winner.append(player[0])
             if len(winner) == 1:
-                return winner, len(winner)
+                return winner, 1
         return winner, len(winner)
 
 

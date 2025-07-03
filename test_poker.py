@@ -43,3 +43,6 @@ def test_two_pair():
     assert hand_evaluation.two_pair_check([2, 2, 3, 3, 4]) == True
     assert hand_evaluation.two_pair_check([10, 13, 7, 13, 10]) == True
     assert hand_evaluation.two_pair_check([1, 2, 3, 4, 5]) == False
+
+hand_evaluation = HandEvaluator({0: [Card("10", "Spades"), Card("9", "Spades")], 1: [Card("10", "Diamonds"), Card("Ace", "Clubs")], 2: [Card("7", "Clubs"), Card("3", "Spades")]}, [Card("5", "Spades"), Card("6", "Diamonds"), Card("8", "Spades"), Card("7", "Hearts"), Card("9", "Diamonds")])
+hand_evaluation.evaluate()

@@ -1,1 +1,2 @@
 import poker
+poker.main()

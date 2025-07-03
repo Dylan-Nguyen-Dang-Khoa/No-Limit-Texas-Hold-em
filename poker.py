@@ -151,12 +151,12 @@ class PokerGame:
                 self.players_list[active_players_list[0]].money += self.pot
                 print(f"{self.players_list[active_players_list[0]].name} won ${self.pot}")
             else:
-                self.active_players_cards = {
+                active_players_cards = {
                     player_index: self.players_list[player_index].hole_cards
                     for player_index in active_players_list
                 }
                 hand_evaluation = HandEvaluator(
-                    self.active_players_cards,
+                    active_players_cards,
                     self.community_cards,
                 )
                 winners, num_winner = hand_evaluation.evaluate()
@@ -165,8 +165,15 @@ class PokerGame:
                     print(
                         f"{self.players_list[winner].name} won ${self.pot//num_winner}"
                     )
-            for player in self.players_list:
+            temp_players_list = []
+            for index, player in enumerate(self.players_list):
                 print(player)
+                if not player.money > 0:
+                    print(f"{player.name} has run out of money and shall now be ejected from the game")
+                    self.player_num -= 1
+                else:
+                    temp_players_list.append(player)
+            self.players_list = temp_players_list
             self.quit = (
                 input("Press q to quit, any other button to continue: ").lower().strip()
             )
@@ -316,14 +323,16 @@ class PokerGame:
             player = self.players_list[current_player_index]
             if not player.fold_status and player.money > 0:
                 player_contributions = contributions[current_player_index]
-                if player_contributions < current_bet:
+                if (player_contributions < current_bet) and player.money > 0:
                     action = self.playerUI(
                         player, player_contributions, current_bet, "preflop no check"
                     )
-                else:
+                elif player.money > 0:
                     action = self.playerUI(
                         player, player_contributions, current_bet, "preflop check"
                     )
+                else:
+                    action = ""
                 if action == "fold":
                     del contributions[current_player_index]
                     player.fold_status = True
@@ -379,9 +388,9 @@ class PokerGame:
             len(set(contributions.values())) > 1 or players_played < self.active_players
         ):
             player = self.players_list[current_player_index]
-            if not player.fold_status and player.money > 0:
+            if not player.fold_status:
                 player_contributions = contributions[current_player_index]
-                if player_contributions < current_bet or current_bet == 0:
+                if (player_contributions < current_bet or current_bet == 0) and player.money > 0:
                     action = self.playerUI(
                         player, player_contributions, current_bet, "postflop"
                     )

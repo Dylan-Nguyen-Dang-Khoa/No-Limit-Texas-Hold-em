@@ -654,7 +654,7 @@ class HandEvaluator:
                     )
 
         if len(set(list(winner.keys())[0] for winner in winners_list)) == 1:
-            return [next(iter(winners_list[0]))], 1
+            return [list(winners_list[0].keys())[0]], 1
         else:
             return self.winner_tiebreaker(winners_list, winners_hand_score)
 
@@ -728,19 +728,19 @@ class HandEvaluator:
         tie_breaker_comparisons = []
         if winners_hand_score in [8, 5, 4, 0]:
             for player_dict in winners_list:
-                player_index, card_ranks = next(iter(player_dict.items()))
+                player_index, card_ranks = list(player_dict.items())[0]
                 tie_breaker_comparisons.append(
                     self.highest_card_tiebreaker(card_ranks, player_index)
                 )
         elif winners_hand_score == 2:
             for player_dict in winners_list:
-                player_index, card_ranks = next(iter(player_dict.items()))
+                player_index, card_ranks = list(player_dict.items())[0]
                 tie_breaker_comparisons.append(
                     self.two_pair_tiebreaker(card_ranks, player_index)
                 )
         else:
             for player_dict in winners_list:
-                player_index, card_ranks = next(iter(player_dict.items()))
+                player_index, card_ranks = list(player_dict.items())[0]
                 if winners_hand_score == 7:
                     frequency = 4
                 elif winners_hand_score in [6, 3]:

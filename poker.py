@@ -165,7 +165,7 @@ class PokerGame:
                 )
                 winners, num_winner = hand_evaluation.evaluate()
                 for winner in winners:
-                    self.players_list[winner] += self.pot // num_winner
+                    self.players_list[winner].money += self.pot // num_winner
                     print(
                         f"{self.players_list[winner].name} won ${self.pot//num_winner}"
                     )

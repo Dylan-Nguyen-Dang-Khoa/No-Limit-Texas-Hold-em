@@ -759,8 +759,8 @@ class HandEvaluator:
                 elif player[i] == max:
                     winner.append(player[0])
             if len(set(winner)) == 1:
-                return winner, 1
-        return winner, len(winner)
+                return set(winner), 1
+        return set(winner), len(set(winner))
 
 
 def main():
